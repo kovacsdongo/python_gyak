@@ -1,0 +1,98 @@
+import unittest
+import asserts
+
+from asserts import assert_true, assert_equal, assert_raises
+import sys
+from selenium import webdriver
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+from selenium import webdriver
+driver = webdriver.Chrome()
+
+url_address = "http://www.bebe.com/checkout/add_item.cmd?form_state=productForm&productId=135330&productName=Lace%2BOpen%2BBack%2BDress&parentCategoryId=197&categoryId=0&subCategoryId=198&itemGUID=&addTo=2&dest=%2Fuser%2Fadd_item_to_wishlist.cmd&showBreadcrumb=&readonly=false&editonly=false&productVariantId=&colorSelectedValue=BRIGHT+WHITE&sizeSelectedValue=&styleId=905133&sizeType=null&fpSize=TEST_PDP&quantity=1&sourceCode="
+errorMsg1 = "Please check the error(s) highlighted below."
+errorMsg2 = "Please select a color option."
+errorMsg3 = "Please select a size option."
+empty_list = []
+
+class TestAddToBasketFunctions(unittest.TestCase):
+
+    def setup(self):
+    #set up the environment
+        self.driver = webdriver.Chrome()
+        self.driver.get(url_address)
+
+    def test_click_add_basket_without_choosen_error_messages(self):
+    #click to add basket and check three error messages
+        driver = self.driver
+        driver.find_element_by_id("addToBag").click()
+
+        message = driver.find_element_by_xpath("/html/body/div[1]/div[2]/div/div/div/div[2]/div[2]/div[2]/form/div[1]/div[1]/div[3]").getText()
+        assert_equal("Your error message", message.contains(errorMsg1))
+
+        message = driver.find_element_by_css_selector(("common-error variantError_SIZE_NAME")).getText()
+        assert_equal("Your error message", message.contains(errorMsg2))
+
+        message = driver.findElement(
+            By.xpath("/html/body/div[1]/div[2]/div/div/div/div[2]/div[1]/span")).getText()
+        assert_equal("Your error message", message.contains(errorMsg3))
+
+
+
+
+    def test_choose_color(self):
+    #choose color and check that this message disappeared
+        driver = self.driver
+        driver.find_elements_by_class_name("swatch-img").click()
+        driver.find_element_by_id("addToBag").click()
+
+        msg_color = driver.find_element_by_xpath(
+            "/html/body/div[1]/div[2]/div/div/div/div[2]/div[2]/div[2]/form/div[1]/div[1]/div[3]").getText()
+
+        empty_list.append(msg_color)
+
+        if not empty_list:
+            return False
+
+        message = driver.find_element_by_css_selector(("common-error variantError_SIZE_NAME")).getText()
+        assert_true("Your error message", message.contains(errorMsg2))
+
+        message = driver.findElement(
+            By.xpath("/html/body/div[1]/div[2]/div/div/div/div[2]/div[1]/span")).getText()
+        assert_true("Your error message", message.contains(errorMsg3))
+
+
+
+    def test_choose_color_size(self):
+    #choose color,size and check that these message disappeared
+        driver = self.driver
+        driver.find_elements_by_class_name("swatch-img").click()
+        driver.find_element_by_id("addToBag").click()
+
+        msg2 = driver.find_element_by_css_selector(("common-error variantError_SIZE_NAME")).getText()
+
+        empty_list.append(self.msg1,msg2)
+        if not empty_list:
+            return False
+
+        message = driver.findElement(
+            By.xpath("/html/body/div[1]/div[2]/div/div/div/div[2]/div[1]/span")).getText()
+        assert_true("Your error message", message.contains(errorMsg3))
+
+
+    def test_click_add_basket_without_choosen_error_messages(self):
+    #finally add to basket and check that the nav basket bar in the left hand side appeared
+        driver = self.driver
+        driver.find_element_by_id("glo-ucart-slider-container").click()
+
+    def tearDown(self):
+        self.driver.quit()
+
+
+
+
+if __name__ == '__main__':
+    unittest.main()
+
